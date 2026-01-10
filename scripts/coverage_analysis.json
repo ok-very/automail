@@ -1,0 +1,90 @@
+{
+  "projects": [
+    {
+      "name": "Aragon \u2013 E 49th",
+      "owner": "Neal",
+      "found": false,
+      "board_name": null,
+      "stage_coverage": {}
+    },
+    {
+      "name": "AviSina \u2013 Broadway Village",
+      "owner": "Neal",
+      "found": false,
+      "board_name": null,
+      "stage_coverage": {}
+    },
+    {
+      "name": "Intracorp \u2013 Arbutus",
+      "owner": "Neal",
+      "found": false,
+      "board_name": null,
+      "stage_coverage": {}
+    },
+    {
+      "name": "Keltic \u2013 6620 Sussex",
+      "owner": "Neal",
+      "found": false,
+      "board_name": null,
+      "stage_coverage": {}
+    },
+    {
+      "name": "Lowtide \u2013 Canada Goose",
+      "owner": "Neal",
+      "found": false,
+      "board_name": null,
+      "stage_coverage": {}
+    },
+    {
+      "name": "UBC Gateway",
+      "owner": "Ellen",
+      "found": false,
+      "board_name": null,
+      "stage_coverage": {}
+    },
+    {
+      "name": "PC Urban \u2013 Barnard",
+      "owner": "Ellen",
+      "found": true,
+      "board_name": "PC Urban - Esquimalt - Carey Newman",
+      "stage_coverage": {}
+    },
+    {
+      "name": "PC Urban - Uptown",
+      "owner": "Ellen",
+      "found": true,
+      "board_name": "PC Urban - Esquimalt - Carey Newman",
+      "stage_coverage": {}
+    },
+    {
+      "name": "NSPH \u2013 All Nations Sacred Space",
+      "owner": "Alannah",
+      "found": true,
+      "board_name": "Subitems of NSPH - Blessing Ceremony",
+      "stage_coverage": {}
+    },
+    {
+      "name": "NSPH Exterior",
+      "owner": "Alannah",
+      "found": false,
+      "board_name": null,
+      "stage_coverage": {}
+    },
+    {
+      "name": "NSPH Interior",
+      "owner": "Alannah",
+      "found": false,
+      "board_name": null,
+      "stage_coverage": {}
+    }
+  ],
+  "stats": {
+    "PPAP": 0,
+    "DPAP": 0,
+    "Selection": 0,
+    "Contract": 0,
+    "Management": 0,
+    "Installation": 0,
+    "Final Doc": 0
+  }
+}

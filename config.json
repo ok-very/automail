@@ -1,0 +1,21 @@
+{
+    "email": {
+        "refresh_interval_seconds": 300,
+        "auto_refresh": true,
+        "max_emails_per_project": 50
+    },
+    "api": {
+        "host": "localhost",
+        "port": 8000,
+        "cors_origins": [
+            "http://localhost:5173"
+        ]
+    },
+    "onedrive": {
+        "auto_create_folders": true,
+        "use_ai_naming": true
+    },
+    "monday": {
+        "board_search_limit": 10
+    }
+}

@@ -1,0 +1,166 @@
+Power Automate Desktop Flow - Email to Local Folder
+==================================================
+
+This Power Automate Desktop (PAD) flow saves emails directly to your local folder.
+Copy these actions into Power Automate Desktop.
+
+PREREQUISITES:
+- Power Automate Desktop installed
+- Outlook desktop app configured
+- Run this flow manually or on a schedule via Task Scheduler
+
+---------------------------------------------------------------------------
+FLOW DEFINITION (Copy into PAD)
+---------------------------------------------------------------------------
+
+# Variables
+SET BaseFolder TO 'C:\\Users\\Neal\\Documents\\emails\\inbox'
+SET ProcessedFolder TO 'Processed'
+
+# Launch Outlook and get emails
+Outlook.Launch Instance=> OutlookInstance
+Outlook.RetrieveEmailMessages.RetrieveAllEmails Instance: OutlookInstance Account: '' MailFolder: 'Inbox' EmailMessages=> RetrievedEmails
+
+# Process each email
+FOR EACH CurrentEmail IN RetrievedEmails
+    
+    # Create safe folder name from subject and date
+    SET EmailDate TO CurrentEmail.ReceivedDateTime
+    Text.ConvertDateTimeToText DateTime: EmailDate StandardFormat: 'yyyy-MM-dd_HHmmss' Result=> DateString
+    
+    SET RawSubject TO CurrentEmail.Subject
+    Text.Replace Text: RawSubject TextToFind: '/' ReplaceWith: '-' Result=> SafeSubject
+    Text.Replace Text: SafeSubject TextToFind: '\\' ReplaceWith: '-' Result=> SafeSubject
+    Text.Replace Text: SafeSubject TextToFind: ':' ReplaceWith: '-' Result=> SafeSubject
+    Text.Replace Text: SafeSubject TextToFind: '*' ReplaceWith: '-' Result=> SafeSubject
+    Text.Replace Text: SafeSubject TextToFind: '?' ReplaceWith: '-' Result=> SafeSubject
+    Text.Replace Text: SafeSubject TextToFind: '"' ReplaceWith: '-' Result=> SafeSubject
+    Text.Replace Text: SafeSubject TextToFind: '<' ReplaceWith: '-' Result=> SafeSubject
+    Text.Replace Text: SafeSubject TextToFind: '>' ReplaceWith: '-' Result=> SafeSubject
+    Text.Replace Text: SafeSubject TextToFind: '|' ReplaceWith: '-' Result=> SafeSubject
+    
+    # Truncate subject if too long
+    Text.GetSubtext Text: SafeSubject Start: 0 Length: 50 Result=> TruncatedSubject
+    
+    SET EmailFolderName TO '%DateString%_%TruncatedSubject%'
+    SET EmailFolderPath TO '%BaseFolder%\\%EmailFolderName%'
+    
+    # Create folder for this email
+    Folder.CreateFolder FolderPath: EmailFolderPath
+    
+    # Create attachments subfolder
+    SET AttachmentsFolderPath TO '%EmailFolderPath%\\attachments'
+    Folder.CreateFolder FolderPath: AttachmentsFolderPath
+    
+    # Save metadata as JSON
+    SET MetadataContent TO '{
+  "subject": "%CurrentEmail.Subject%",
+  "from": "%CurrentEmail.SenderEmailAddress%",
+  "fromName": "%CurrentEmail.SenderName%",
+  "to": "%CurrentEmail.To%",
+  "cc": "%CurrentEmail.CC%",
+  "receivedDateTime": "%CurrentEmail.ReceivedDateTime%",
+  "hasAttachments": %CurrentEmail.HasAttachment%
+}'
+    
+    SET MetadataPath TO '%EmailFolderPath%\\metadata.json'
+    File.WriteText FilePath: MetadataPath TextToWrite: MetadataContent AppendNewLine: False IfFileExists: 'Overwrite' Encoding: 'UTF-8'
+    
+    # Save email body as HTML
+    SET BodyPath TO '%EmailFolderPath%\\body.html'
+    SET BodyContent TO CurrentEmail.Body
+    File.WriteText FilePath: BodyPath TextToWrite: BodyContent AppendNewLine: False IfFileExists: 'Overwrite' Encoding: 'UTF-8'
+    
+    # Save plain text version
+    SET PlainTextPath TO '%EmailFolderPath%\\body.txt'
+    SET PlainTextContent TO CurrentEmail.BodyAsText
+    File.WriteText FilePath: PlainTextPath TextToWrite: PlainTextContent AppendNewLine: False IfFileExists: 'Overwrite' Encoding: 'UTF-8'
+    
+    # Save attachments
+    IF CurrentEmail.HasAttachment = True THEN
+        Outlook.SaveAttachments Email: CurrentEmail Path: AttachmentsFolderPath
+    END IF
+    
+    # Move email to Processed folder (optional - uncomment to enable)
+    # Outlook.MoveEmail Instance: OutlookInstance Email: CurrentEmail MoveTo: ProcessedFolder
+    
+END FOR
+
+# Close Outlook connection
+Outlook.Close Instance: OutlookInstance
+
+---------------------------------------------------------------------------
+SCHEDULING WITH TASK SCHEDULER
+---------------------------------------------------------------------------
+
+To run this flow automatically:
+
+1. Save the flow in Power Automate Desktop
+2. Open Task Scheduler (taskschd.msc)
+3. Create Basic Task:
+   - Name: "Email Sync to Local Folder"
+   - Trigger: Daily (or your preferred schedule)
+   - Action: Start a program
+   - Program: "C:\Program Files (x86)\Power Automate Desktop\PAD.Console.Host.exe"
+   - Arguments: /flow "Email to Local Folder" /run
+   
+4. In the task properties, check "Run whether user is logged in or not"
+
+---------------------------------------------------------------------------
+ALTERNATIVE: PowerShell Script (No Power Automate Required)
+---------------------------------------------------------------------------
+
+If you prefer a pure PowerShell solution, create a .ps1 script with this:
+
+```powershell
+# Requires Outlook COM object
+$outlook = New-Object -ComObject Outlook.Application
+$namespace = $outlook.GetNamespace("MAPI")
+$inbox = $namespace.GetDefaultFolder(6)  # 6 = Inbox
+
+$baseFolder = "C:\Users\Neal\Documents\emails\inbox"
+$cutoffDate = (Get-Date).AddDays(-1)  # Get emails from last 24 hours
+
+foreach ($mail in $inbox.Items) {
+    if ($mail.ReceivedTime -gt $cutoffDate) {
+        $dateStr = $mail.ReceivedTime.ToString("yyyy-MM-dd_HHmmss")
+        $safeSubject = $mail.Subject -replace '[\\/:*?"<>|]', '-'
+        $safeSubject = $safeSubject.Substring(0, [Math]::Min(50, $safeSubject.Length))
+        
+        $folderName = "${dateStr}_${safeSubject}"
+        $folderPath = Join-Path $baseFolder $folderName
+        
+        # Create folders
+        New-Item -ItemType Directory -Path $folderPath -Force | Out-Null
+        New-Item -ItemType Directory -Path "$folderPath\attachments" -Force | Out-Null
+        
+        # Save metadata
+        $metadata = @{
+            subject = $mail.Subject
+            from = $mail.SenderEmailAddress
+            fromName = $mail.SenderName
+            to = $mail.To
+            cc = $mail.CC
+            receivedDateTime = $mail.ReceivedTime.ToString("o")
+            hasAttachments = $mail.Attachments.Count -gt 0
+        } | ConvertTo-Json
+        $metadata | Out-File "$folderPath\metadata.json" -Encoding UTF8
+        
+        # Save body
+        $mail.HTMLBody | Out-File "$folderPath\body.html" -Encoding UTF8
+        $mail.Body | Out-File "$folderPath\body.txt" -Encoding UTF8
+        
+        # Save attachments
+        foreach ($attachment in $mail.Attachments) {
+            $attachment.SaveAsFile("$folderPath\attachments\$($attachment.FileName)")
+        }
+        
+        Write-Host "Saved: $folderName"
+    }
+}
+
+[System.Runtime.Interopservices.Marshal]::ReleaseComObject($outlook) | Out-Null
+```
+
+Save as: C:\Users\Neal\Documents\emails\scripts\sync_emails.ps1
+Run manually or schedule with Task Scheduler.
