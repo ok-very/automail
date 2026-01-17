@@ -10,7 +10,7 @@ from typing import List, Dict, Optional
 from dataclasses import dataclass
 
 # API Configuration
-GEMINI_API_KEY = "AIzaSyAJ3_P5WKeamnv94gJUvhIyJTo72kcF2fc"
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
 
 @dataclass
@@ -79,6 +79,12 @@ def generate_draft(context: EmailContext, templates: Optional[List[str]] = None)
     Returns:
         Dict with 'draft' text and 'reasoning'
     """
+    if not GEMINI_API_KEY:
+        return {
+            "error": "Missing API Key",
+            "details": "GEMINI_API_KEY environment variable not set."
+        }
+    
     # Build the prompt
     prompt_parts = [
         "You are a professional public art consultant responding to an email.",
