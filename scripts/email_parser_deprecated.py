@@ -1,8 +1,17 @@
 """
+DEPRECATED: This module has been migrated to AutoHelper.
+See: autohelper/modules/mail/service.py
+
 Email Parser - Watches Outlook inbox and extracts metadata to organized folders.
 
 Triggers: Can run as a scheduled task or watch for new emails in real-time.
 Output: Saves emails to OneDrive/Emails/{ProjectName}/{date_subject}/
+
+Migration Notes:
+- Core polling logic → MailService._poll_loop(), _check_inbox()
+- PST ingestion → MailService.ingest_pst()
+- extract_project_info(), clean_subject() → mail/service.py
+- DB storage replaces file-based metadata.json output
 """
 
 import win32com.client

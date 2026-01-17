@@ -1,6 +1,14 @@
 """
+DEPRECATED: Outlook COM helpers partially migrated to AutoHelper.
+See: autohelper/modules/mail/service.py
+
 Outlook COM integration for creating drafts.
 Uses win32com to interact with Outlook application.
+
+Migration Notes:
+- Outlook connection → MailService._get_outlook()
+- COM initialization → guarded in MailService with _HAS_WIN32 flag
+- Draft creation functions remain here for automail frontend use (not yet migrated)
 """
 
 import win32com.client

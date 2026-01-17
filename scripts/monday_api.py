@@ -1,18 +1,16 @@
 """
-Monday.com API integration for pushing data to boards.
-Board naming convention: Developer - Project - Item
+DEPRECATED: This module has been ported to AutoHelper.
+Please use `autohelper.modules.context` instead.
 
-Enhanced with:
-- Search boards by project name
-- Export board data (like CSV)
-- Update item column values
-- Schema discovery and hierarchy traversal (via MondayConnector)
-
-UPGRADE NOTES:
-- Uses MondayClient for all API calls
-- Token loaded from MONDAY_API_KEY environment variable
-- Import MondayConnector for advanced traversal features
+Monday.com API integration
 """
+
+import warnings
+warnings.warn(
+    "This module is deprecated. Use `autohelper.modules.context` instead.",
+    DeprecationWarning,
+    stacklevel=2
+)
 
 import os
 import json

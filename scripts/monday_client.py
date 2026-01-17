@@ -1,11 +1,16 @@
 """
+DEPRECATED: This module has been ported to AutoHelper.
+Please use `autohelper.modules.context.monday` instead.
+
 Monday.com GraphQL Client
-
-SDK-style wrapper for Monday.com API access.
-Provides consistent error handling and configuration.
-
-Aligned with autoart's MondayClient pattern.
 """
+
+import warnings
+warnings.warn(
+    "This module is deprecated. Use `autohelper.modules.context.monday` instead.",
+    DeprecationWarning,
+    stacklevel=2
+)
 
 import os
 import requests

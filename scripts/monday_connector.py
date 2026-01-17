@@ -1,17 +1,16 @@
 """
+DEPRECATED: This module has been ported to AutoHelper.
+Please use `autohelper.modules.context.monday` instead.
+
 Monday.com Connector
-
-Traverses Monday.com hierarchy (boards → groups → items → subitems)
-and normalizes data into MondayDataNode tree structure.
-
-Responsibilities:
-- Board schema discovery
-- Hierarchy traversal with pagination
-- Column value normalization with renderHint mapping
-- Data streaming via generators
-
-Aligned with autoart's MondayConnector pattern.
 """
+
+import warnings
+warnings.warn(
+    "This module is deprecated. Use `autohelper.modules.context.monday` instead.",
+    DeprecationWarning,
+    stacklevel=2
+)
 
 import json
 from typing import Any, Generator, Literal
